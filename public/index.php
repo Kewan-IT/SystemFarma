@@ -26,6 +26,10 @@
         .logo {
             font-size: 40px;
         }
+        .logo img {
+    width: 180px;
+    margin-bottom: 10px;
+}
     </style>
 </head>
 <body class="d-flex align-items-center justify-content-center">
@@ -37,8 +41,9 @@
             <div class="card login-card shadow p-4">
                 
                 <div class="text-center mb-4">
-                    <div class="logo">💊</div>
-                    <h4>Kewan_Farma</h4>
+                    <div class="logo">
+                        <img src="assets/logo.png" alt="Logo" style="width: 180px;">
+                    </div>
                     <p class="text-muted">Faça login para continuar</p>
                 </div>
 

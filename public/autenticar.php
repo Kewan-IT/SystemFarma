@@ -8,8 +8,9 @@ require_once("../config/conexao.php");
 $email = $_POST['email'];
 $senha = $_POST['senha'];
 
+
 // Prevenir SQL Injection
-$stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = ?");
+$stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = ? AND status = 'Ativo'");  
 $stmt->bind_param("s", $email);
 $stmt->execute();
 
@@ -20,7 +21,7 @@ if ($result->num_rows > 0) {
 
     if (password_verify($senha, $user['senha'])) {
         $_SESSION['usuario'] = $user['nome'];
-        $_SESSION['email'] = $user['email'];
+        $_SESSION['perfil'] = $user['perfil'];
 
         header("Location: dashboard.php");
         exit();
@@ -32,5 +33,8 @@ if ($result->num_rows > 0) {
 } else {
     header("Location: index.php?erro=1");
     exit();
+}
+if ($_SESSION['perfil'] != 'Admin') {
+    die("Acesso negado!");
 }
 ?>
