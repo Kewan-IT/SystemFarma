@@ -173,17 +173,28 @@ function finalizarVenda() {
 
     fetch("venda_store.php", {
         method: "POST",
-        credentials: "same-origin",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({
             carrinho: carrinho,
             pagamento: document.getElementById("pagamento").value
         })
     })
-    .then(res => res.text())
+    .then(res => res.json())
     .then(res => {
-        alert(res);
-        location.reload();
+
+        if (res.status === "ok") {
+
+            // abrir PDF automaticamente
+            window.open("recibo_pdf.php?venda_id=" + res.venda_id, "_blank");
+
+            // limpar carrinho
+            carrinho = [];
+            render();
+
+        } else {
+            alert(res.msg);
+        }
+
     });
 }
 </script>

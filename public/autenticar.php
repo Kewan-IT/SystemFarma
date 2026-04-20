@@ -25,7 +25,7 @@ if ($result->num_rows > 0) {
         $_SESSION['usuario_id'] = $user['id'];
         $_SESSION['funcionario_id'] = $user['funcionario_id']; 
 
-        header("Location: dashboard.php");
+        header("Location: relatorios.php");
         exit();
     } else {
         header("Location: index.php?erro=1");

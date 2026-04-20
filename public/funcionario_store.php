@@ -2,60 +2,98 @@
 session_start();
 require_once("../config/conexao.php");
 
-// VERIFICAR SE VEIO DO FORMULÁRIO
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // RECEBER DADOS
-    $nome = $_POST['nome'];
-    $apelido = $_POST['apelido'];
-    $data_nascimento = $_POST['data_nascimento'];
-    $nivel = $_POST['nivel'];
-    $area = $_POST['area'];
-    $contacto = $_POST['contacto'];
-    $email = $_POST['email'];
+    // =========================
+    // 📥 RECEBER DADOS
+    // =========================
+    $nome = $_POST['nome'] ?? '';
+    $apelido = $_POST['apelido'] ?? '';
+    $data_nascimento = $_POST['data_nascimento'] ?? '';
+    $nivel = $_POST['nivel'] ?? '';
+    $area = $_POST['area'] ?? '';
+    $contacto = $_POST['contacto'] ?? '';
+    $email = $_POST['email'] ?? '';
 
-    // CALCULAR IDADE (BACKEND)
+    // =========================
+    // 🎂 CALCULAR IDADE
+    // =========================
     $nascimento = new DateTime($data_nascimento);
     $hoje = new DateTime();
     $idade = $hoje->diff($nascimento)->y;
 
-    // 📁 PASTA DE UPLOAD
-    $pasta = "uploads/";
+    // =========================
+    // 📁 PASTA
+    // =========================
+    $pasta = "../uploads/";
+
+    if (!is_dir($pasta)) {
+        mkdir($pasta, 0755, true);
+    }
 
     // =========================
     // 📄 UPLOAD PDF
     // =========================
-    $pdf = $_FILES['documento'];
+    $pdf_caminho = null;
 
-    if ($pdf['type'] != "application/pdf") {
-        die("Erro: Apenas PDF permitido!");
+    if (isset($_FILES['documento']) && $_FILES['documento']['error'] === 0) {
+
+        $pdf = $_FILES['documento'];
+
+        // validar tipo
+        if ($pdf['type'] !== "application/pdf") {
+            die("Erro: Apenas PDF permitido!");
+        }
+
+        // validar tamanho (máx 5MB)
+        if ($pdf['size'] > 5 * 1024 * 1024) {
+            die("PDF muito grande (máx 5MB)");
+        }
+
+        $pdf_nome = uniqid("doc_", true) . ".pdf";
+        $pdf_caminho = $pasta . $pdf_nome;
+
+        if (!move_uploaded_file($pdf['tmp_name'], $pdf_caminho)) {
+            die("Erro ao enviar PDF.");
+        }
     }
-
-    $pdf_nome = uniqid() . ".pdf";
-    $pdf_caminho = $pasta . $pdf_nome;
-
-    move_uploaded_file($pdf['tmp_name'], $pdf_caminho);
 
     // =========================
     // 🖼️ UPLOAD FOTO
     // =========================
-   $foto_nome = null;
+    $foto_nome = "default.png";
 
-if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === 0) {
 
-    $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-    $foto_nome = uniqid() . "." . $ext;
+        $foto = $_FILES['foto'];
 
-    move_uploaded_file(
-        $_FILES['foto']['tmp_name'],
-        "../uploads/" . $foto_nome
-    );
-}
+        // validar tamanho (2MB)
+        if ($foto['size'] > 2 * 1024 * 1024) {
+            die("Imagem muito grande (máx 2MB)");
+        }
+
+        // validar imagem real
+        if (!getimagesize($foto['tmp_name'])) {
+            die("Arquivo de imagem inválido");
+        }
+
+        $ext = strtolower(pathinfo($foto['name'], PATHINFO_EXTENSION));
+        $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
+
+        if (!in_array($ext, $permitidos)) {
+            die("Formato de imagem não permitido");
+        }
+
+        $foto_nome = uniqid("user_", true) . "." . $ext;
+
+        if (!move_uploaded_file($foto['tmp_name'], $pasta . $foto_nome)) {
+            die("Erro ao enviar imagem.");
+        }
+    }
 
     // =========================
     // 💾 INSERIR NO BANCO
     // =========================
-
     $stmt = $conn->prepare("INSERT INTO funcionarios 
         (nome, apelido, data_nascimento, idade, nivel_academico, area_formacao, contacto, email, documento_pdf, foto) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");

@@ -2,11 +2,19 @@
 session_start();
 require_once("../config/conexao.php");
 
+header('Content-Type: application/json');
+
 $data = json_decode(file_get_contents("php://input"), true);
 
-$usuario_id = $_SESSION['usuario_id'];
-$carrinho = $data['carrinho'];
-$pagamento = $data['pagamento'];
+$usuario_id = $_SESSION['usuario_id'] ?? null;
+
+if (!$usuario_id) {
+    echo json_encode(["status"=>"erro","msg"=>"Usuário não autenticado"]);
+    exit;
+}
+
+$carrinho = $data['carrinho'] ?? [];
+$pagamento = $data['pagamento'] ?? '';
 
 $conn->begin_transaction();
 
@@ -26,9 +34,7 @@ try {
         ");
         $stmt->bind_param("i", $id);
         $stmt->execute();
-        $res = $stmt->get_result();
-
-        $produto = $res->fetch_assoc();
+        $produto = $stmt->get_result()->fetch_assoc();
 
         if (!$produto) throw new Exception("Produto não existe");
 
@@ -49,6 +55,7 @@ try {
         ];
     }
 
+    // inserir venda
     $stmt = $conn->prepare("
     INSERT INTO vendas (total, metodo_pagamento, usuario_id)
     VALUES (?, ?, ?)
@@ -58,6 +65,7 @@ try {
 
     $venda_id = $conn->insert_id;
 
+    // inserir itens + atualizar stock
     foreach ($itens_validados as $item) {
 
         $stmt = $conn->prepare("
@@ -76,10 +84,17 @@ try {
 
     $conn->commit();
 
-    echo "✅ Venda concluída com sucesso!";
+    echo json_encode([
+        "status" => "ok",
+        "venda_id" => $venda_id
+    ]);
 
 } catch (Exception $e) {
 
     $conn->rollback();
-    echo "❌ " . $e->getMessage();
+
+    echo json_encode([
+        "status" => "erro",
+        "msg" => $e->getMessage()
+    ]);
 }
