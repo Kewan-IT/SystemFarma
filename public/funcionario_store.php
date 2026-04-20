@@ -39,20 +39,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // =========================
     // 🖼️ UPLOAD FOTO
     // =========================
-    $foto = $_FILES['foto'];
+   $foto_nome = null;
 
-    $extensoes_validas = ['jpg', 'jpeg', 'png'];
+if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
 
-    $ext = strtolower(pathinfo($foto['name'], PATHINFO_EXTENSION));
-
-    if (!in_array($ext, $extensoes_validas)) {
-        die("Erro: Apenas imagens JPG, JPEG ou PNG!");
-    }
-
+    $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
     $foto_nome = uniqid() . "." . $ext;
-    $foto_caminho = $pasta . $foto_nome;
 
-    move_uploaded_file($foto['tmp_name'], $foto_caminho);
+    move_uploaded_file(
+        $_FILES['foto']['tmp_name'],
+        "../uploads/" . $foto_nome
+    );
+}
 
     // =========================
     // 💾 INSERIR NO BANCO
@@ -73,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $contacto,
         $email,
         $pdf_caminho,
-        $foto_caminho
+        $foto_nome
     );
 
     if ($stmt->execute()) {

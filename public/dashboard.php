@@ -1,12 +1,16 @@
 <?php
 session_start();
+require_once("../config/conexao.php");
 
-if (!isset($_SESSION['usuario'])) {
-    header("Location: index.php");
-    exit();
+$funcionario_id = $_SESSION['funcionario_id'] ?? null;
+
+$func = null;
+
+if ($funcionario_id) {
+    $sql = "SELECT nome, apelido, foto FROM funcionarios WHERE id = $funcionario_id";
+    $res = $conn->query($sql);
+    $func = $res->fetch_assoc();
 }
-
-$usuario = $_SESSION['usuario'];
 ?>
 
 <!DOCTYPE html>
@@ -20,6 +24,7 @@ $usuario = $_SESSION['usuario'];
 
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
 body {
@@ -127,8 +132,8 @@ body {
         <i class="bi bi-cart"></i> Vendas
     </a>
     <div class="collapse submenu" id="vendas">
-        <a href="#"><i class="bi bi-plus"></i> Nova Venda</a>
-        <a href="#"><i class="bi bi-list"></i> Lista de Vendas</a>
+        <a href="venda_create.php"><i class="bi bi-plus"></i> Nova Venda</a>
+        <a href="vendas_list.php"><i class="bi bi-list"></i> Lista de Vendas</a>
         <a href="#"><i class="bi bi-receipt"></i> Recibos</a>
     </div>
 
@@ -167,7 +172,7 @@ body {
     <i class="bi bi-bar-chart"></i> Relatórios
 </a>
 <div class="collapse submenu" id="relatorios">
-    <a href="#"><i class="bi bi-pie-chart"></i> Vendas por Categoria</a>
+    <a href="relatorios.php"><i class="bi bi-pie-chart"></i> Vendas por Categoria</a>
     <a href="#"><i class="bi bi-person-badge"></i> Vendas por Usuário</a>
     <a href="#"><i class="bi bi-cash-stack"></i> Lucros</a>
     <a href="#"><i class="bi bi-graph-up"></i> Mais Vendidos</a>
@@ -192,11 +197,23 @@ body {
     <a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a>
 </div>
     <!-- USUÁRIO -->
-    <div class="user-box text-center">
-        <img src="https://via.placeholder.com/50" class="rounded-circle mb-2">
-        <div><?php echo $usuario; ?></div>
-        <a href="logout.php" class="btn btn-sm btn-light mt-2">Sair</a>
-    </div>
+   <div class="user-box text-center mt-auto p-3">
+
+<img src="/uploads/<?= $foto ?>" 
+     class="rounded-circle mb-2"
+     width="70" height="70"
+     style="object-fit: cover; border:2px solid #22c55e;">
+
+<div class="text-white">
+<strong><?= $func['nome'] ?? 'Usuário' ?></strong><br>
+<small><?= $func['apelido'] ?? '' ?></small>
+</div>
+
+<a href="logout.php" class="btn btn-sm btn-danger mt-2 w-100">
+Sair
+</a>
+
+</div>
 
 </div>
 
@@ -213,7 +230,18 @@ body {
         <input type="text" class="form-control search-box mx-3" placeholder="Pesquisar...">
 
         <div>
-            <i class="bi bi-bell fs-5"></i>
+            <li class="nav-item dropdown">
+    <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown">
+        <i class="bi bi-bell fs-5"></i>
+        <span id="contador-alertas" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            0
+        </span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end" id="lista-alertas" style="width:300px;">
+        <li class="dropdown-header">Notificações</li>
+    </ul>
+</li>
         </div>
 
     </nav>
@@ -231,6 +259,46 @@ function toggleMenu() {
     document.getElementById("content").classList.toggle("full");
 }
 </script>
+<script>
+function carregarAlertas() {
+    fetch("get_alertas.php")
+    .then(res => res.json())
+    .then(data => {
 
+        let contador = document.getElementById("contador-alertas");
+        let lista = document.getElementById("lista-alertas");
+
+        if (!contador || !lista) return;
+
+        contador.innerText = data.length;
+
+        lista.innerHTML = '<li class="dropdown-header">Notificações</li>';
+
+        if (data.length === 0) {
+            lista.innerHTML += '<li class="dropdown-item text-muted">Sem alertas</li>';
+        }
+
+        data.forEach(alerta => {
+
+            let cor = alerta.tipo === "stock" ? "text-danger" : "text-warning";
+
+            lista.innerHTML += `
+                <li>
+                    <a class="dropdown-item ${cor}" href="#">
+                        ${alerta.mensagem}
+                    </a>
+                </li>
+            `;
+        });
+
+    });
+}
+
+// carregar ao abrir
+carregarAlertas();
+
+// atualizar automaticamente
+setInterval(carregarAlertas, 10000);
+</script>
 </body>
 </html>

@@ -22,6 +22,8 @@ if ($result->num_rows > 0) {
     if (password_verify($senha, $user['senha'])) {
         $_SESSION['usuario'] = $user['nome'];
         $_SESSION['perfil'] = $user['perfil'];
+        $_SESSION['usuario_id'] = $user['id'];
+        $_SESSION['funcionario_id'] = $user['funcionario_id']; 
 
         header("Location: dashboard.php");
         exit();

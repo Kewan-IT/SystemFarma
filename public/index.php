@@ -1,4 +1,11 @@
-<?php if(isset($_GET['erro'])): ?>
+<?php
+session_start();
+
+$_SESSION['usuario_id'] = $user['id'];
+$_SESSION['usuario'] = $user['nome'];
+
+
+ if(isset($_GET['erro'])): ?>
 <div class="alert alert-danger">
     Email ou senha incorretos!
 </div>

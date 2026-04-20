@@ -12,34 +12,37 @@ $func = $conn->query("SELECT * FROM funcionarios WHERE id = $id")->fetch_assoc()
 
 <h4>Atribuir Credenciais</h4>
 
-<form action="salvar_credenciais.php" method="POST">
+<form method="POST" action="salvar_credenciais.php">
 
-<input type="hidden" name="funcionario_id" value="<?= $func['id'] ?>">
 
-<div class="mb-3">
-<label>Nome</label>
-<input type="text" class="form-control" value="<?= $func['nome'] ?>" disabled>
-</div>
+    <select name="funcionario_id" class="form-control" required>
+    <option value="">Selecionar Funcionário</option>
 
-<div class="mb-3">
-<label>Email</label>
-<input type="email" name="email" class="form-control" required>
-</div>
+    <?php
+    $res = $conn->query("
+        SELECT f.id, f.nome, f.apelido 
+        FROM funcionarios f
+        LEFT JOIN usuarios u ON f.id = u.funcionario_id
+        WHERE u.id IS NULL
+    ");
 
-<div class="mb-3">
-<label>Senha</label>
-<input type="password" name="senha" class="form-control" required>
-</div>
+    while($f = $res->fetch_assoc()):
+    ?>
+        <option value="<?= $f['id'] ?>">
+            <?= $f['nome'] ?> <?= $f['apelido'] ?>
+        </option>
+    <?php endwhile; ?>
+</select><!-- lista funcionários -->
 
-<div class="mb-3">
-<label>Perfil</label>
-<select name="perfil" class="form-control">
-<option value="Admin">Admin</option>
-<option value="Tecn">Tecn</option>
+<input type="email" name="email" required>
+<input type="password" name="senha" required>
+
+<select name="perfil">
+    <option value="Admin">Admin</option>
+    <option value="Tecn">Tecn</option>
 </select>
-</div>
 
-<button class="btn btn-success">Salvar</button>
+<button type="submit">Salvar</button>
 
 </form>
 

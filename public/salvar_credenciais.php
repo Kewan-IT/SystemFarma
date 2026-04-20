@@ -1,21 +1,29 @@
 <?php
 require_once("../config/conexao.php");
 
-$funcionario_id = $_POST['funcionario_id'];
+// receber dados
 $email = $_POST['email'];
-$senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
+$senha = $_POST['senha'];
 $perfil = $_POST['perfil'];
+$funcionario_id = $_POST['funcionario_id'];
 
-// usar nome do funcionário como nome do usuário
-$func = $conn->query("SELECT nome FROM funcionarios WHERE id = $funcionario_id")->fetch_assoc();
-$nome = $func['nome'];
+// 🔥 buscar nome do funcionario
+$res = $conn->query("SELECT nome FROM funcionarios WHERE id = $funcionario_id");
+$f = $res->fetch_assoc();
 
-$stmt = $conn->prepare("INSERT INTO usuarios (nome, email, senha, funcionario_id, perfil) VALUES (?, ?, ?, ?, ?)");
+$nome = $f['nome']; // ✔️ agora vem do banco
 
-$stmt->bind_param("sssis", $nome, $email, $senha, $funcionario_id, $perfil);
+// hash da senha
+$senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
-if ($stmt->execute()) {
-    header("Location: funcionarios_list.php?sucesso=1");
-} else {
-    echo "Erro: " . $stmt->error;
-}
+// inserir
+$stmt = $conn->prepare("
+INSERT INTO usuarios (nome, email, senha, funcionario_id, perfil)
+VALUES (?, ?, ?, ?, ?)
+");
+
+$stmt->bind_param("sssis", $nome, $email, $senha_hash, $funcionario_id, $perfil);
+
+$stmt->execute();
+
+echo "Usuário criado com sucesso!";
