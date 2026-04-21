@@ -17,7 +17,7 @@ $tipos = $conn->query("SELECT * FROM tipos_produto");
     border-radius: 10px;
 }
 </style>
-<?php include("dashboard.php"); ?>
+<?php include("../layouts/dashboard.php"); ?>
 <div class="container mt-4">
 <div class="card p-4 shadow-sm">
 

@@ -1,4 +1,4 @@
-<?php include("dashboard.php"); ?>
+<?php include("../layouts/dashboard.php"); ?>
 
 <div class="container mt-4">
 

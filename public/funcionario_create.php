@@ -36,7 +36,7 @@ body { background: #f4f6f9; }
 </div>
 <?php endif; ?>
 <!-- IMPORTAR SUA SIDEBAR + TOPBAR -->
-<?php include("dashboard.php"); ?>
+<?php include("../layouts/dashboard.php"); ?>
 
 <div class="container mt-4">
 

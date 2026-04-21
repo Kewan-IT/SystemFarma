@@ -1,7 +1,7 @@
 <?php
 require_once("../config/conexao.php");
 ?>
-<?php include("dashboard.php"); ?>
+<?php include("../layouts/dashboard.php"); ?>
 
 <div class="container mt-4">
 <style>

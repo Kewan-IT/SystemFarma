@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once("../config/conexao.php");
 
 $funcionario_id = $_SESSION['funcionario_id'] ?? null;
@@ -173,7 +175,7 @@ body {
             <i class="bi bi-chevron-right float-end"></i>
         </li>
         <div class="submenu" id="rel">
-            <a href="relatorios.php">Vendas</a>
+            <a href="dashboard_pro.php">📊 Geral</a>
         </div>
 
     </ul>

@@ -33,7 +33,7 @@ body { background: #f4f6f9; }
 </head>
 <body>
 
-<?php include("dashboard.php"); ?>
+<?php include("../layouts/dashboard.php"); ?>
 
 <div class="container mt-4">
 
@@ -80,7 +80,7 @@ body { background: #f4f6f9; }
 
     <td>
 
-        <a href="funcionario_show.php?id=<?php echo $row['id']; ?>" class="btn btn-info btn-sm">
+        <a href="funcionario_pdf.php?id=<?php echo $row['id']; ?>" class="btn btn-info btn-sm">
             <i class="bi bi-eye"></i>
         </a>
 

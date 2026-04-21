@@ -6,7 +6,7 @@ $id = $_GET['id'];
 $func = $conn->query("SELECT * FROM funcionarios WHERE id = $id")->fetch_assoc();
 ?>
 
-<?php include("dashboard.php"); ?>
+<?php include("../layouts/dashboard.php"); ?>
 
 <div class="container mt-5">
 
